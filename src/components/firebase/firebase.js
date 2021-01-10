@@ -26,7 +26,10 @@ class Firebase {
 
   subscribeToBookComments({ bookId, onSnapshotCallback }) {
     const bookRef = this.db.collection('books').doc(bookId);
-    return this.db.collection('comments').where('book', '==', bookRef).onSnapshot((snapshot) => {
+    return this.db.collection('comments')
+      .where('book', '==', bookRef)
+      .orderBy('dateCreated', 'desc')
+      .onSnapshot((snapshot) => {
       onSnapshotCallback(snapshot);
     });
   }
@@ -39,6 +42,13 @@ class Firebase {
     await this.auth.signOut();
   }
 
+  async postComment({text, bookId}) {
+    const postCommentCallabe = this.functions.httpsCallable('postComment');
+    return postCommentCallabe({
+      text,
+      bookId
+    })
+  }
 }
 
 let firebaseInstance;
